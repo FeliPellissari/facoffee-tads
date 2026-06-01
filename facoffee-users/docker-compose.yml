@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: facoffee-users-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: facoffee
+      POSTGRES_PASSWORD: facoffee
+      POSTGRES_DB: facoffee_users
+    ports:
+      - "5433:5432"
+    volumes:
+      - facoffee_users_db_data:/var/lib/postgresql/data
+
+volumes:
+  facoffee_users_db_data:
