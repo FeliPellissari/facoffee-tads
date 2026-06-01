@@ -26,6 +26,8 @@ export async function createUser(data: {
 
   const keycloakId = await createKeycloakUser(data.name, data.email);
 
+  await replaceKeycloakUserRoles(keycloakId, roles);
+
   return userRepository.createUser({
     name: data.name,
     email: data.email,
