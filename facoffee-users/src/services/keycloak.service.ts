@@ -87,7 +87,14 @@ export async function createKeycloakUser(
     );
   }
 
-  return users[0].id;
+  const keycloakId = users[0].id;
+
+  await fetch(`${adminBase}/users/${keycloakId}/send-verify-email`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return keycloakId;
 }
 
 /**
