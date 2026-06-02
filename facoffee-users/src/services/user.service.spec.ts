@@ -88,6 +88,32 @@ describe('UserService Unit Tests', () => {
       expect(result.deactivatedAt).toBeDefined();
       expect(publisher.publishUserDeactivated).toHaveBeenCalledWith({ userId: 'user-1', reason: 'Saiu da empresa' });
     });
+
+    it('deve publicar o evento somente após a persistência no banco (ordem garantida)', async () => {
+      const callOrder: string[] = [];
+
+      const mockUser = { 
+        id: 'user-1', name: 'User 1', email: 'u1@teste.com', 
+        roles: ['PARTICIPANT'], keycloakId: 'kc-u1', 
+        status: 'ACTIVE', createdAt: new Date(), updatedAt: new Date() 
+      };
+      const deactivatedUser = { 
+        ...mockUser, status: 'INACTIVE', deactivatedAt: new Date() 
+      };
+
+      jest.mocked(userRepository.findUserById).mockResolvedValue(mockUser);
+      jest.mocked(userRepository.deactivateUser).mockImplementation(async () => {
+        callOrder.push('db');
+        return deactivatedUser;
+      });
+      jest.mocked(publisher.publishUserDeactivated).mockImplementation(async () => {
+        callOrder.push('publish');
+      });
+
+      await userService.deactivateUser('user-1', 'Saiu da empresa');
+
+      expect(callOrder).toEqual(['db', 'publish']);
+    });
   });
 
   describe('replaceUserRoles', () => {

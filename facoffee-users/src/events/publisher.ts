@@ -4,11 +4,24 @@ import { getRabbitChannel } from "../config/rabbitmq";
 const EXCHANGE = "domain.events";
 
 /**
- * Envelope do evento `UserDeactivated` conforme `async-docs.yaml`.
+ * Payload do evento UserDeactivated.
+ * Conforme schema `UserDeactivatedEvent` do `async-docs.yaml`.
  */
 interface UserDeactivatedPayload {
   userId: string;
   reason: string;
+}
+
+/**
+ * Envelope do evento UserDeactivated.
+ * Conforme schema `EventEnvelopeBase` e `UserDeactivatedEvent` do `async-docs.yaml`.
+ */
+interface UserDeactivatedEvent {
+  eventId: string;
+  eventType: "UserDeactivated";
+  occurredAt: string;
+  version: "1.0";
+  payload: UserDeactivatedPayload;
 }
 
 /**
@@ -23,7 +36,7 @@ interface UserDeactivatedPayload {
 export async function publishUserDeactivated(
   payload: UserDeactivatedPayload
 ): Promise<void> {
-  const event = {
+  const event: UserDeactivatedEvent = {
     eventId: crypto.randomUUID(),
     eventType: "UserDeactivated",
     occurredAt: new Date().toISOString(),
