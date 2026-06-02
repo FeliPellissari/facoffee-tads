@@ -5,6 +5,13 @@ import { UserRole } from "../domain/user.entity";
 
 const userRoleSchema = z.enum(["MANAGER", "PARTICIPANT"]);
 
+const listUsersQuerySchema = z.object({
+  status: z.enum(["ACTIVE", "INACTIVE"]).optional(),
+  role: userRoleSchema.optional(),
+  page: z.coerce.number().int().min(0).default(0),
+  size: z.coerce.number().int().min(1).max(100).default(20),
+});
+
 const createUserSchema = z.object({
   name: z.string().min(3),
   email: z.string().email(),
@@ -53,12 +60,13 @@ export async function listUsers(
   next: NextFunction
 ): Promise<void> {
   try {
-    const page = parseInt(String(req.query["page"] ?? "0"), 10);
-    const size = Math.min(parseInt(String(req.query["size"] ?? "20"), 10), 100);
-    const status = req.query["status"] as "ACTIVE" | "INACTIVE" | undefined;
-    const role = req.query["role"] as UserRole | undefined;
-
-    const result = await userService.listUsers({ page, size, status, role });
+    const query = listUsersQuerySchema.parse(req.query);
+    const result = await userService.listUsers({
+      page: query.page,
+      size: query.size,
+      status: query.status,
+      role: query.role as UserRole | undefined,
+    });
     res.json(result);
   } catch (err) {
     next(err);
