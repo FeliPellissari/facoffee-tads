@@ -55,8 +55,6 @@ export function errorMiddleware(
     status = 409;
     error = "Conflict";
     message = err.message;
-  } else if (err instanceof Error) {
-    message = err.message;
   }
 
   const body: ErrorResponse = { timestamp, status, error, message, path };
