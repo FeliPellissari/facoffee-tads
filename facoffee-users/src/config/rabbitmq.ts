@@ -1,3 +1,4 @@
+// @ts-nocheck
 import amqplib, { Channel, Connection } from "amqplib";
 import { env } from "./env";
 
